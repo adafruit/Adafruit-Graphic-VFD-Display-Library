@@ -45,9 +45,7 @@ void Adafruit_MonoGfx::fillCircle(uint8_t x0, uint8_t y0, uint8_t r,
   int8_t x = 0;
   int8_t y = r;
 
-  for (uint8_t i=y0-r; i<=y0+r; i++) {
-    drawPixel(x0, i, color);
-  }
+  drawFastVLine(x0, y0-r, r*2+1, color);
 
   while (x<y) {
     if (f >= 0) {
@@ -58,15 +56,12 @@ void Adafruit_MonoGfx::fillCircle(uint8_t x0, uint8_t y0, uint8_t r,
     x++;
     ddF_x += 2;
     f += ddF_x;
-  
-    for (uint8_t i=y0-y; i<=y0+y; i++) {
-      drawPixel(x0+x, i, color);
-      drawPixel(x0-x, i, color);
-    } 
-    for (uint8_t i=y0-x; i<=y0+x; i++) {
-      drawPixel(x0+y, i, color);
-      drawPixel(x0-y, i, color);
-    }    
+
+    drawFastVLine(x0+x, y0-y, y*2+1, color);
+    drawFastVLine(x0-x, y0-y, y*2+1, color);
+
+    drawFastVLine(x0+y, y0-x, x*2+1, color);
+    drawFastVLine(x0-y, y0-x, x*2+1, color);
   }
 }
 
