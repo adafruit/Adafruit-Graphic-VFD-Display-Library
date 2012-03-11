@@ -1,87 +1,72 @@
+#ifndef _ADAFRUIT_GP9002_H
+#define _ADAFRUIT_GP9002_H
+
 #if ARDUINO >= 100
  #include "Arduino.h"
 #else
  #include "WProgram.h"
 #endif
 
-#define swap(a, b) { uint8_t t = a; a = b; b = t; }
+#include "Adafruit_MonoGfx.h"
 
 #define BLACK 0
 #define WHITE 1
 
-  #define GP9002_LCDWIDTH                  128
-  #define GP9002_LCDHEIGHT                 64
+#define GP9002_DISPLAYSOFF 0x00
+#define GP9002_DISPLAY1ON 0x01
+#define GP9002_DISPLAY2ON 0x02
+#define GP9002_ADDRINCR 0x04
+#define GP9002_ADDRHELD 0x05
+#define GP9002_CLEARSCREEN 0x06
+#define GP9002_CONTROLPOWER 0x07
+#define GP9002_DATAWRITE 0x08
+#define GP9002_DATAREAD 0x09
+#define GP9002_LOWERADDR1 0x0A
+#define GP9002_HIGHERADDR1 0x0B
+#define GP9002_LOWERADDR2 0x0C
+#define GP9002_HIGHERADDR1 0x1D
+#define GP9002_ADDRL 0x0E
+#define GP9002_ADDRH 0x0F
+#define GP9002_OR 0x10
+#define GP9002_XOR 0x11
+#define GP9002_AND 0x12
+#define GP9002_BRIGHT 0x13
+#define GP9002_DISPLAY 0x14
+#define GP9002_DISPLAY_MONOCHROME 0x10
+#define GP9002_DISPLAY_GRAYSCALE 0x14
+#define GP9002_INTMODE 0x15
+#define GP9002_DRAWCHAR 0x20
+#define GP9002_CHARRAM 0x21
+#define GP9002_CHARSIZE 0x22
+#define GP9002_CHARBRIGHT 0x24
 
-#define GP9002_SETCONTRAST 0x81
-#define GP9002_DISPLAYALLON_RESUME 0xA4
-#define GP9002_DISPLAYALLON 0xA5
-#define GP9002_NORMALDISPLAY 0xA6
-#define GP9002_INVERTDISPLAY 0xA7
-#define GP9002_DISPLAYOFF 0xAE
-#define GP9002_DISPLAYON 0xAF
 
-#define GP9002_SETDISPLAYOFFSET 0xD3
-#define GP9002_SETCOMPINS 0xDA
-
-#define GP9002_SETVCOMDETECT 0xDB
-
-#define GP9002_SETDISPLAYCLOCKDIV 0xD5
-#define GP9002_SETPRECHARGE 0xD9
-
-#define GP9002_SETMULTIPLEX 0xA8
-
-#define GP9002_SETLOWCOLUMN 0x00
-#define GP9002_SETHIGHCOLUMN 0x10
-
-#define GP9002_SETSTARTLINE 0x40
-
-#define GP9002_MEMORYMODE 0x20
-
-#define GP9002_COMSCANINC 0xC0
-#define GP9002_COMSCANDEC 0xC8
-
-#define GP9002_SEGREMAP 0xA0
-
-#define GP9002_CHARGEPUMP 0x8D
-
-#define GP9002_EXTERNALVCC 0x1
-#define GP9002_SWITCHCAPVCC 0x2
-
-class Adafruit_GP9002 {
+class Adafruit_GP9002 : public Adafruit_MonoGfx {
  public:
-  Adafruit_GP9002(int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, int8_t CS) :sid(SID), sclk(SCLK), dc(DC), rst(RST), cs(CS) {}
-  Adafruit_GP9002(int8_t SID, int8_t SCLK, int8_t DC, int8_t RST) :sid(SID), sclk(SCLK), dc(DC), rst(RST), cs(-1) {}
+  Adafruit_GP9002(int8_t SCLK, int8_t MISO, int8_t MOSI, 
+		  int8_t CS, int8_t DC);
 
-
-  void init(uint8_t switchvcc);
+  // particular to this display
+  void begin(void);
+  uint8_t spiTransfer(uint8_t d, uint8_t datacommand);
   void command(uint8_t c);
-  void data(uint8_t c);
+  uint8_t data(uint8_t c);
   void setBrightness(uint8_t val);
-  void clearDisplay(void);
-  void clear();
   void invert(uint8_t i);
-  void display();
 
-  void setpixel(uint8_t x, uint8_t y, uint8_t color);
-  void fillCircle(uint8_t x0, uint8_t y0, uint8_t r, 
-		  uint8_t color);
-  void drawCircle(uint8_t x0, uint8_t y0, uint8_t r, 
-		  uint8_t color);
-  void drawRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, 
-		uint8_t color);
-  void fillRect(uint8_t x, uint8_t y, uint8_t w, uint8_t h, 
-		uint8_t color);
-  void drawLine(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, 
-		uint8_t color);
+  void displayOn();
+  void displayOff();
+  void clearDisplay(void);
+
+  void drawPixel(uint8_t x, uint8_t y, uint8_t color);
+  void drawFastVLine(uint8_t x, uint8_t y, uint8_t h, uint8_t color);
+
   void drawChar(uint8_t x, uint8_t line, uint8_t c);
   void drawString(uint8_t x, uint8_t line, char *c);
 
-  void drawBitmap(uint8_t x, uint8_t y, 
-		  const uint8_t *bitmap, uint8_t w, uint8_t h,
-		  uint8_t color);
-
  private:
-  int8_t sid, sclk, dc, rst, cs;
+  int8_t _miso, _mosi, _sclk, _dc, _cs;
   void spiwrite(uint8_t c);
-
 };
+
+#endif
