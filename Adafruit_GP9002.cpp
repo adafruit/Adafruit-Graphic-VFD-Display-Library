@@ -58,6 +58,9 @@ void Adafruit_GP9002::begin(void) {
 
 // updated high speed drawing!
 void Adafruit_GP9002::drawFastVLine(uint16_t x, uint16_t orig_y, uint16_t h, uint16_t color) {
+  if ((x >= width()) || (orig_y >= height())) return;
+  //if ((orig_y+h) >= height()) 
+  //  h = height() - orig_y -1;
 
   while (h && (orig_y % 8)) {
     drawPixel(x, orig_y, color);
@@ -83,9 +86,9 @@ void Adafruit_GP9002::drawFastVLine(uint16_t x, uint16_t orig_y, uint16_t h, uin
     while (h >= 8) {
       // draw 8 pixels at once!
       if (color) 
-	fastSPIwrite(0xFF);
+	dataWrite(0xFF);
       else 
-	fastSPIwrite(0);
+	dataWrite(0x00);
       h -= 8;
       orig_y += 8;
     }
