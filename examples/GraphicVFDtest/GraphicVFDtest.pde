@@ -1,17 +1,21 @@
+#include <SPI.h>
 #include "Adafruit_GFX.h"
 #include "Adafruit_GP9002.h"
 
-#define _MISO 2   // #8
-#define _CLK 3     // #11
-#define _MOSI 4    // #12
-#define _DC 6     // #14
-#define _CS 5     // #13
-
+#define _MISO 12     // VFD PIN#8
+#define _CLK  13     // VFD PIN#11
+#define _MOSI 11     // VFD PIN#12
+#define _CS   10     // VFD PIN#13
+#define _DC    9     // VFD PIN#14
+// connect VFD #15, #16, #17 to 5V
+// connect VFD #9 #18 #19 #20 to ground
 
 Adafruit_GP9002 display = Adafruit_GP9002(_CLK, _MISO, _MOSI, _CS, _DC);
 
-// connect #15, #16, #17 to 5V
-// connect #9 #18 #19 #20 to ground
+// if using hardware SPI on an UNO or other classic Arduino, the pinouts are the same as
+// above.
+//Adafruit_GP9002 display = Adafruit_GP9002(_CS, _DC);
+
 
 #define NUMFLAKES 10
 #define XPOS 0
@@ -25,6 +29,7 @@ static unsigned char __attribute__ ((progmem)) logo16_glcd_bmp[]={
 0x30, 0xf0, 0xf0, 0xf0, 0xf0, 0x30, 0xf8, 0xbe, 0x9f, 0xff, 0xf8, 0xc0, 0xc0, 0xc0, 0x80, 0x00, 
 0x20, 0x3c, 0x3f, 0x3f, 0x1f, 0x19, 0x1f, 0x7b, 0xfb, 0xfe, 0xfe, 0x07, 0x07, 0x07, 0x03, 0x00, };
 
+#include "adabmp.c"
 
 void setup()   {                
   Serial.begin(9600);
@@ -34,17 +39,15 @@ void setup()   {
   
   delay(2000);
   display.clearDisplay();   // clears the screen and buffer
-
-  // draw a single pixel
-  display.drawPixel(10, 10, WHITE);
-  delay(2000);
+/*
+  display.drawPixel(20, 20, WHITE);
+ 
   display.clearDisplay();
 
   // draw many lines
   testdrawline();
   delay(2000);
   display.clearDisplay();
-
   // draw rectangles
   testdrawrect();
   delay(2000);
@@ -59,12 +62,13 @@ void setup()   {
   testdrawcircle();
   delay(2000);
   display.clearDisplay();
+*/                   
 
   // draw a circle, 10 pixel radius
-  display.fillCircle(display.width()/2, display.height()/2, 10, WHITE);
+  display.fillCircle(20, 20, 20, WHITE);
   delay(2000);
-  display.clearDisplay();
 
+  display.clearDisplay();
   testdrawroundrect();
   delay(2000);
   display.clearDisplay();
@@ -102,14 +106,10 @@ void setup()   {
   display.clearDisplay();
   display.drawBitmap(30, 16,  logo16_glcd_bmp, 16, 16, 1);
 
-  // invert the display
-  display.invertDisplay(true);
-  delay(1000); 
-  display.invertDisplay(false);
-  delay(1000); 
-
-  // draw a bitmap icon and 'animate' movement
-  testdrawbitmap(logo16_glcd_bmp, LOGO16_GLCD_HEIGHT, LOGO16_GLCD_WIDTH);
+  delay(1000);
+  display.clearDisplay();
+  display.drawBitmap(0, 0, adabmp, 128, 64, 1);
+  
 }
 
 
@@ -207,14 +207,14 @@ void testfilltriangle(void) {
 }
 
 void testdrawroundrect(void) {
-  for (uint8_t i=0; i<display.height()/2-2; i+=2) {
+  for (uint8_t i=0; i<display.height()/4; i+=2) {
     display.drawRoundRect(i, i, display.width()-2*i, display.height()-2*i, display.height()/4, WHITE);
   }
 }
 
 void testfillroundrect(void) {
   uint8_t color = WHITE;
-  for (uint8_t i=0; i<display.height()/2-2; i+=2) {
+  for (uint8_t i=0; i<display.height()/4-2; i+=2) {
     display.fillRoundRect(i, i, display.width()-2*i, display.height()-2*i, display.height()/4, color);
     if (color == BLACK) color = WHITE;
     else color = BLACK;
