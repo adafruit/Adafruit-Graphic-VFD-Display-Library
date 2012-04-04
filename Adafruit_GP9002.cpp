@@ -13,28 +13,46 @@ Adafruit_GP9002::Adafruit_GP9002(int8_t SCLK, int8_t MISO, int8_t MOSI,
   _mosi = MOSI;
   _cs = CS;
   _dc = DC;
+  hwSPI = false;
+  constructor(128, 64);
+}
 
+Adafruit_GP9002::Adafruit_GP9002(int8_t CS, int8_t DC) {
+  _sclk = -1;
+  _miso = -1;
+  _mosi = -1;
+  _cs = CS;
+  _dc = DC;
+  hwSPI = true;
   constructor(128, 64);
 }
 
 void Adafruit_GP9002::begin(void) {
   // set pin directions
-  pinMode(_mosi, OUTPUT);
-  pinMode(_miso, INPUT);
-  pinMode(_sclk, OUTPUT);
   pinMode(_dc, OUTPUT);
   pinMode(_cs, OUTPUT);
 
-  clkport     = portOutputRegister(digitalPinToPort(_sclk));
-  clkpinmask  = digitalPinToBitMask(_sclk);
-  mosiport    = portOutputRegister(digitalPinToPort(_mosi));
-  mosipinmask = digitalPinToBitMask(_mosi);
+  if (! hwSPI) {
+    pinMode(_mosi, OUTPUT);
+    pinMode(_miso, INPUT);
+    pinMode(_sclk, OUTPUT);
+    
+    clkport     = portOutputRegister(digitalPinToPort(_sclk));
+    clkpinmask  = digitalPinToBitMask(_sclk);
+    mosiport    = portOutputRegister(digitalPinToPort(_mosi));
+    mosipinmask = digitalPinToBitMask(_mosi);
+    misopin = portInputRegister(digitalPinToPort(_miso));
+    misopinmask = digitalPinToBitMask(_miso);
+  } else {
+    SPI.begin();
+    SPI.setClockDivider(SPI_CLOCK_DIV4);
+    SPI.setBitOrder(MSBFIRST);
+    SPI.setDataMode(SPI_MODE0);
+  }
   csport    = portOutputRegister(digitalPinToPort(_cs));
   cspinmask = digitalPinToBitMask(_cs);
   dcport    = portOutputRegister(digitalPinToPort(_dc));
   dcpinmask = digitalPinToBitMask(_dc);
-  misopin = portInputRegister(digitalPinToPort(_miso));
-  misopinmask = digitalPinToBitMask(_miso);
 
   command(GP9002_DISPLAY);
   dataWrite(GP9002_DISPLAY_MONOCHROME);
@@ -62,28 +80,33 @@ void Adafruit_GP9002::drawFastVLine(uint16_t x, uint16_t orig_y, uint16_t h, uin
   //if ((orig_y+h) >= height()) 
   //  h = height() - orig_y -1;
 
-  while (h && (orig_y % 8)) {
+  //drawLine(x, orig_y, x, orig_y+h, color); return;
+
+  while (h) {
+    if ((h >= 8) && ((orig_y) % 8 == 0)) 
+      break;
+    Serial.print("("); Serial.print(x, DEC); Serial.print(", "); Serial.print(orig_y); Serial.println(")");
     drawPixel(x, orig_y, color);
     orig_y++;
     h--;
-  }    
+  }
 
   if (h >= 8) {
-    // calculate addr
-    uint16_t addr = 0;
-    addr = x*8;
-    addr += orig_y/8;
-    
-    command(GP9002_ADDRINCR);
-    command(GP9002_ADDRL);
-    dataWrite(addr & 0xFF);
-    command(GP9002_ADDRH);
-    dataWrite(addr >> 8);
-    command(GP9002_DATAWRITE);
-
-    *dcport &= ~dcpinmask;
-    *csport &= ~cspinmask;
     while (h >= 8) {
+      // calculate addr
+      uint16_t addr = 0;
+      addr = x*8;
+      uint16_t y = orig_y;
+      y = 63 - y;
+      addr += y/8;
+
+      Serial.println(addr, HEX);
+      command(GP9002_ADDRHELD);
+      command(GP9002_ADDRL);
+      dataWrite(addr & 0xFF);
+      command(GP9002_ADDRH);
+      dataWrite(addr >> 8);
+      command(GP9002_DATAWRITE);
       // draw 8 pixels at once!
       if (color) 
 	dataWrite(0xFF);
@@ -92,15 +115,13 @@ void Adafruit_GP9002::drawFastVLine(uint16_t x, uint16_t orig_y, uint16_t h, uin
       h -= 8;
       orig_y += 8;
     }
-    *csport |= cspinmask;
-    command(GP9002_ADDRHELD);
   }
-  
-  while (h) {
-    drawPixel(x, orig_y, color);
+  while (h+1) {
+    drawPixel(x, orig_y-1, color);
     orig_y++;
     h--;
   }
+
 }
 
 // the most basic function, set a single pixel
@@ -116,6 +137,7 @@ void Adafruit_GP9002::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
   y = 63 - y;
   addr += y/8;
 
+  command(GP9002_ADDRHELD);
   command(GP9002_ADDRL);
   dataWrite(addr & 0xFF);
   command(GP9002_ADDRH);
@@ -123,6 +145,8 @@ void Adafruit_GP9002::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
   command(GP9002_DATAREAD);
   dataRead();
   p = dataRead();
+
+  //Serial.println(p, HEX);
 
   if (color)
     p |= (1 << (7-(y % 8)));
@@ -176,6 +200,11 @@ void Adafruit_GP9002::slowSPIwrite(uint8_t d) {
 }
 
 inline void Adafruit_GP9002::fastSPIwrite(uint8_t d) {
+  if (hwSPI) {
+    SPDR = d;
+    while(!(SPSR & _BV(SPIF)));
+    return;
+  }
   for(uint8_t bit = 0x1; bit != 0x00; bit <<= 1) {
     *clkport &= ~clkpinmask;
     if(d & bit) *mosiport |=  mosipinmask;

@@ -6,6 +6,7 @@
 #else
  #include "WProgram.h"
 #endif
+#include <SPI.h>
 
 #include "Adafruit_GFX.h"
 
@@ -45,6 +46,7 @@ class Adafruit_GP9002 : public Adafruit_GFX {
  public:
   Adafruit_GP9002(int8_t SCLK, int8_t MISO, int8_t MOSI, 
 		  int8_t CS, int8_t DC);
+  Adafruit_GP9002(int8_t CS, int8_t DC);
 
   // particular to this display
   void begin(void);
@@ -71,6 +73,8 @@ class Adafruit_GP9002 : public Adafruit_GFX {
 
   volatile uint8_t *mosiport, *misopin, *clkport, *csport, *dcport;
   uint8_t mosipinmask, misopinmask, clkpinmask, cspinmask, dcpinmask;
+
+  boolean hwSPI;
 
   void spiwrite(uint8_t c);
 };
