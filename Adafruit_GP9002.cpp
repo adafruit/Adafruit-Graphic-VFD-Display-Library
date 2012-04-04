@@ -85,36 +85,36 @@ void Adafruit_GP9002::drawFastVLine(uint16_t x, uint16_t orig_y, uint16_t h, uin
   while (h) {
     if ((h >= 8) && ((orig_y) % 8 == 0)) 
       break;
-    Serial.print("("); Serial.print(x, DEC); Serial.print(", "); Serial.print(orig_y); Serial.println(")");
     drawPixel(x, orig_y, color);
     orig_y++;
     h--;
   }
 
   if (h >= 8) {
-    while (h >= 8) {
       // calculate addr
       uint16_t addr = 0;
       addr = x*8;
-      uint16_t y = orig_y;
+      uint16_t y = orig_y+h-8;
       y = 63 - y;
       addr += y/8;
 
       Serial.println(addr, HEX);
-      command(GP9002_ADDRHELD);
+      command(GP9002_ADDRINCR);
       command(GP9002_ADDRL);
       dataWrite(addr & 0xFF);
       command(GP9002_ADDRH);
       dataWrite(addr >> 8);
       command(GP9002_DATAWRITE);
-      // draw 8 pixels at once!
-      if (color) 
-	dataWrite(0xFF);
-      else 
-	dataWrite(0x00);
-      h -= 8;
-      orig_y += 8;
-    }
+
+      while (h >= 8) {
+	// draw 8 pixels at once!
+	if (color) 
+	  dataWrite(0xFF);
+	else 
+	  dataWrite(0x00);
+	h -= 8;
+	orig_y += 8;
+      }
   }
   while (h+1) {
     drawPixel(x, orig_y-1, color);
