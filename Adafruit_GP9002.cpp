@@ -75,8 +75,8 @@ void Adafruit_GP9002::begin(void) {
 
 
 // updated high speed drawing!
-void Adafruit_GP9002::drawFastVLine(uint16_t x, uint16_t orig_y, uint16_t h, uint16_t color) {
-  if ((x >= width()) || (orig_y >= height())) return;
+void Adafruit_GP9002::drawFastVLine(int16_t x, int16_t orig_y, int16_t h, uint16_t color) {
+  if ((x < 0) || (x >= width()) || (orig_y >= height())) return;
   //if ((orig_y+h) >= height()) 
   //  h = height() - orig_y -1;
 
@@ -125,8 +125,8 @@ void Adafruit_GP9002::drawFastVLine(uint16_t x, uint16_t orig_y, uint16_t h, uin
 }
 
 // the most basic function, set a single pixel
-void Adafruit_GP9002::drawPixel(uint16_t x, uint16_t y, uint16_t color) {
-  if ((x >= width()) || (y >= height()))
+void Adafruit_GP9002::drawPixel(int16_t x, int16_t y, uint16_t color) {
+  if ((x < 0) || (x >= width()) || (y < 0) || (y >= height()))
     return;
 
   uint8_t p;

@@ -65,8 +65,8 @@ class Adafruit_GP9002 : public Adafruit_GFX {
   void displayOff();
   void clearDisplay(void);
 
-  void drawPixel(uint16_t x, uint16_t y, uint16_t color);
-  void drawFastVLine(uint16_t x, uint16_t y, uint16_t h, uint16_t color);
+  void drawPixel(int16_t x, int16_t y, uint16_t color);
+  void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
 
  private:
   int8_t _miso, _mosi, _sclk, _dc, _cs;

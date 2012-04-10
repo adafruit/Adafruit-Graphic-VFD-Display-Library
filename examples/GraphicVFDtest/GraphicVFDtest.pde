@@ -188,7 +188,7 @@ void testfillrect(void) {
 }
 
 void testdrawtriangle(void) {
-  for (uint16_t i=0; i<min(display.width(),display.height())/2; i+=5) {
+  for (int16_t i=0; i<min(display.width(),display.height())/2; i+=5) {
     display.drawTriangle(display.width()/2, display.height()/2-i,
                      display.width()/2-i, display.height()/2+i,
                      display.width()/2+i, display.height()/2+i, WHITE);
