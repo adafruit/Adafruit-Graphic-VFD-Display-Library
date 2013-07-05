@@ -7,24 +7,23 @@
 #include "glcdfont.c"
 
 Adafruit_GP9002::Adafruit_GP9002(int8_t SCLK, int8_t MISO, int8_t MOSI, 
-				 int8_t CS, int8_t DC) {
+    int8_t CS, int8_t DC) : Adafruit_GFX(128, 64) {
   _sclk = SCLK;
   _miso = MISO;
   _mosi = MOSI;
   _cs = CS;
   _dc = DC;
   hwSPI = false;
-  constructor(128, 64);
 }
 
-Adafruit_GP9002::Adafruit_GP9002(int8_t CS, int8_t DC) {
+Adafruit_GP9002::Adafruit_GP9002(int8_t CS, int8_t DC) :
+    Adafruit_GFX(128, 64) {
   _sclk = -1;
   _miso = -1;
   _mosi = -1;
   _cs = CS;
   _dc = DC;
   hwSPI = true;
-  constructor(128, 64);
 }
 
 void Adafruit_GP9002::begin(void) {
