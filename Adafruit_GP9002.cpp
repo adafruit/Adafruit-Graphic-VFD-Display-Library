@@ -157,7 +157,7 @@ void Adafruit_GP9002::drawPixel(int16_t x, int16_t y, uint16_t color) {
 
   
 
-void Adafruit_GP9002::invert(boolean i) {
+void Adafruit_GP9002::invert(uint8_t i) {
   // This is kinda clumsy but it does work
   // fill the opposite screen with all on pixels so we can invert!
   uint16_t addr = 0x400;
