@@ -59,7 +59,7 @@ class Adafruit_GP9002 : public Adafruit_GFX {
   void dataWrite(uint8_t c);
   uint8_t dataRead(void);
   void setBrightness(uint8_t val);
-  void invert(uint8_t i);
+  void invert(boolean i);
 
   void displayOn();
   void displayOff();
