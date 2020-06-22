@@ -2,9 +2,9 @@
 #define _ADAFRUIT_GP9002_H
 
 #if ARDUINO >= 100
- #include "Arduino.h"
+#include "Arduino.h"
 #else
- #include "WProgram.h"
+#include "WProgram.h"
 #endif
 #include <SPI.h>
 
@@ -41,11 +41,9 @@
 #define GP9002_CHARSIZE 0x22
 #define GP9002_CHARBRIGHT 0x24
 
-
 class Adafruit_GP9002 : public Adafruit_GFX {
- public:
-  Adafruit_GP9002(int8_t SCLK, int8_t MISO, int8_t MOSI, 
-		  int8_t CS, int8_t DC);
+public:
+  Adafruit_GP9002(int8_t SCLK, int8_t MISO, int8_t MOSI, int8_t CS, int8_t DC);
   Adafruit_GP9002(int8_t CS, int8_t DC);
 
   // particular to this display
@@ -68,7 +66,7 @@ class Adafruit_GP9002 : public Adafruit_GFX {
   void drawPixel(int16_t x, int16_t y, uint16_t color);
   void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
 
- private:
+private:
   int8_t _miso, _mosi, _sclk, _dc, _cs;
 
   volatile uint8_t *mosiport, *misopin, *clkport, *csport, *dcport;
